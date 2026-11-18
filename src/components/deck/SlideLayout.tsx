@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSlide } from "./context";
@@ -16,8 +16,13 @@ export function SlideLayout({
   sparks?: number;
 }) {
   const { page, total, static: isStatic } = useSlide();
+  const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setSettled(true), 4000);
+    return () => clearTimeout(t);
+  }, []);
   return (
-    <div className={cn("slide-content", isStatic && "slide-static")}>
+    <div className={cn("slide-content", isStatic && "slide-static", settled && "slide-settled")}>
       <div className="pointer-events-none absolute inset-0">
         {Array.from({ length: sparks }).map((_, i) => (
           <span
