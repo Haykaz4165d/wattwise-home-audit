@@ -1,6 +1,11 @@
 import type { CSSProperties } from "react";
 import { FileSpreadsheet, Leaf, Lightbulb, PiggyBank, PlugZap, Presentation, WashingMachine, Zap, BarChart3 } from "lucide-react";
-import { Kicker, SlideLayout, delay } from "./SlideLayout";
+import ledImg from "@/assets/team3-led-savings.jpg";
+import billImg from "@/assets/table-bill.jpg";
+import defenseImg from "@/assets/deliverables-defense.jpg";
+import ecoHomeImg from "@/assets/conclusion-eco-home.jpg";
+import townImg from "@/assets/thanks-town.jpg";
+import { Backdrop, Kicker, SlideLayout, delay } from "./SlideLayout";
 import { CountUp } from "./CountUp";
 import { fmt, led, ledScenario, rowTotals, sampleRows, TARIFF_AMD } from "@/lib/energy";
 
@@ -19,6 +24,7 @@ export function Team3Slide() {
   const py = y(s.incAmd * s.payback);
   return (
     <SlideLayout>
+      <Backdrop src={ledImg} alt="LED լամպի տեղադրում և խնայողություն" overlay="bg-background/65" />
       <div className="absolute left-[110px] top-[100px] w-[1700px]">
         <Kicker tone="accent">
           <Lightbulb className="h-6 w-6" /> Թիմ 3 · Լուսավորություն և LED
@@ -108,6 +114,7 @@ export function TableSlide() {
   const head = ["Սարքը", "Քանակ", "P, Վտ", "P, կՎտ", "t, ժ/օր", "կՎտ·ժ/ամիս", "Սակագին", "Արժեք, ֏"];
   return (
     <SlideLayout>
+      <Backdrop src={billImg} alt="Էլեկտրաէներգիայի հաշիվ և հաշվիչ" overlay="bg-background/65" />
       <div className="absolute left-[110px] top-[100px] w-[1700px]">
         <Kicker>
           <FileSpreadsheet className="h-6 w-6" /> Excel / Google Sheets ձևանմուշ
@@ -167,6 +174,7 @@ export function DeliverablesSlide() {
   ];
   return (
     <SlideLayout>
+      <Backdrop src={defenseImg} alt="Աշակերտների խմբային պաշտպանություն" area="right" />
       <div className="absolute left-[110px] top-[100px] w-[800px]">
         <Kicker>Վերջնարդյունքներ</Kicker>
         <h2 className="slide-title a-rise mt-8" style={delay(120)}>
@@ -214,6 +222,7 @@ export function ConclusionSlide() {
   ];
   return (
     <SlideLayout>
+      <Backdrop src={ecoHomeImg} alt="Էներգախնայող տուն" area="top" />
       <div className="absolute inset-x-[110px] top-[100px] text-center">
         <div className="flex justify-center">
           <Kicker tone="accent">
@@ -248,6 +257,7 @@ export function ConclusionSlide() {
 export function ThanksSlide() {
   return (
     <SlideLayout sparks={24}>
+      <Backdrop src={townImg} alt="Գիշերային քաղաք կանաչ էներգիայով" overlay="bg-background/45" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[560px] grid-floor" />
       <div className="absolute left-1/2 top-[150px] h-[380px] w-[380px] -translate-x-1/2" style={{ perspective: 1000 }}>
         <div className="a-zoom relative h-full w-full preserve-3d" style={delay(100)}>

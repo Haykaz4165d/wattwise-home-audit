@@ -70,3 +70,51 @@ export function Kicker({ children, d = 0, tone = "primary" }: { children: ReactN
 }
 
 export const delay = (d: number) => ({ "--d": d }) as CSSProperties;
+
+type BackdropArea = "full" | "right" | "left" | "top";
+const backdropBox: Record<BackdropArea, string> = {
+  full: "inset-0",
+  right: "right-0 top-0 h-full w-[1100px]",
+  left: "left-0 top-0 h-full w-[1000px]",
+  top: "inset-x-0 top-0 h-[660px]",
+};
+const backdropOverlay: Record<BackdropArea, string> = {
+  full: "bg-background/70",
+  right: "bg-background/35",
+  left: "bg-background/30",
+  top: "bg-background/50",
+};
+/* Masks fade the photo into whatever is behind it, so no seam shows on the slide's own gradient. */
+const backdropMask: Record<BackdropArea, string | undefined> = {
+  full: undefined,
+  right: "linear-gradient(to right, transparent, black 55%)",
+  left: "linear-gradient(to left, transparent, black 55%)",
+  top: "linear-gradient(to bottom, black 35%, transparent)",
+};
+
+/** Slow-zooming photo behind slide content, faded into the slide background. */
+export function Backdrop({ src, alt, area = "full", overlay }: { src: string; alt: string; area?: BackdropArea; overlay?: string }) {
+  return (
+    <div
+      className={cn("pointer-events-none absolute overflow-hidden", backdropBox[area])}
+      style={{ maskImage: backdropMask[area], WebkitMaskImage: backdropMask[area] }}
+    >
+      <img src={src} alt={alt} width={1600} height={912} className="ken-burns h-full w-full object-cover" />
+      <div className={cn("absolute inset-0", overlay ?? backdropOverlay[area])} />
+      {area === "full" && <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />}
+    </div>
+  );
+}
+
+/** Tilted, floating framed photo for free areas of a slide. */
+export function FloatingPhoto({ src, alt, className, d = 150 }: { src: string; alt: string; className: string; d?: number }) {
+  return (
+    <div className={cn("absolute perspective", className)}>
+      <div className="float-3d h-full w-full">
+        <div className="a-blur h-full w-full overflow-hidden rounded-[40px] border border-border glow" style={delay(d)}>
+          <img src={src} alt={alt} width={1600} height={912} className="ken-burns h-full w-full object-cover" />
+        </div>
+      </div>
+    </div>
+  );
+}

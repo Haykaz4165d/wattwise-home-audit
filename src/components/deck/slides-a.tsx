@@ -12,7 +12,14 @@ import {
   Zap,
 } from "lucide-react";
 import house from "@/assets/house-energy.jpg";
-import { Kicker, SlideLayout, delay } from "./SlideLayout";
+import goalImg from "@/assets/goal-audit.jpg";
+import questionImg from "@/assets/question-room.jpg";
+import meterImg from "@/assets/tasks-meter.jpg";
+import circuitImg from "@/assets/formulas-circuit.jpg";
+import kitchenImg from "@/assets/kitchen-appliances.jpg";
+import standbyImg from "@/assets/standby-devices.jpg";
+import bulbsImg from "@/assets/bulbs-compare.jpg";
+import { Backdrop, FloatingPhoto, Kicker, SlideLayout, delay } from "./SlideLayout";
 import { TARIFF_AMD } from "@/lib/energy";
 
 /* 1 — Title */
@@ -65,6 +72,7 @@ export function GoalSlide() {
   ];
   return (
     <SlideLayout>
+      <Backdrop src={goalImg} alt="Աշակերտը չափում է տան էլեկտրական վահանակը" area="right" />
       <div className="absolute left-[110px] top-[110px] w-[1040px]">
         <Kicker>
           <Target className="h-6 w-6" /> Նպատակը
@@ -112,6 +120,7 @@ export function QuestionSlide() {
   ];
   return (
     <SlideLayout>
+      <Backdrop src={questionImg} alt="Ֆիզիկական բանաձևեր տան սարքերի վրա" overlay="bg-gradient-to-r from-background via-background/80 to-background/30" />
       <div className="absolute right-[120px] top-[40px] perspective">
         <div className="bob slide-num select-none" style={{ fontSize: 520, lineHeight: 1, fontWeight: 900 }}>
           <span className="a-flip text-gradient-energy inline-block" style={delay(100)}>
@@ -155,6 +164,7 @@ export function TasksSlide() {
   return (
     <SlideLayout>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[520px] grid-floor" />
+      <FloatingPhoto src={meterImg} alt="Էլեկտրահաշվիչ կՎտ·ժ ցուցմունքով" className="right-[110px] top-[80px] h-[280px] w-[760px]" />
       <div className="absolute left-[110px] top-[110px]">
         <Kicker>
           <ClipboardList className="h-6 w-6" /> Խնդիրները
@@ -181,6 +191,7 @@ export function TasksSlide() {
 export function FormulasSlide() {
   return (
     <SlideLayout sparks={14}>
+      <Backdrop src={circuitImg} alt="Վոլտմետր և ամպերմետր էլեկտրական շղթայում" area="left" />
       <div className="absolute left-[110px] top-[110px]">
         <Kicker>Բանաձևերի վերհիշում</Kicker>
         <h2 className="slide-title a-rise mt-8" style={delay(120)}>
@@ -234,6 +245,7 @@ export function TeamsSlide() {
       obj: "Սառնարան, լվացքի մեքենա, սալօջախ, արդուկ, միկրոալիքային",
       task: "Ամենաբարձր P ունեցող սարքերի ծախսը",
       tone: "bg-energy",
+      img: kitchenImg,
     },
     {
       icon: Tv,
@@ -242,6 +254,7 @@ export function TeamsSlide() {
       obj: "Հեռուստացույց, համակարգիչ, Wi‑Fi ռոութեր, լիցքավորիչներ",
       task: "«Թաքնված» էներգասպառումը տարեկան կտրվածքով",
       tone: "bg-waste",
+      img: standbyImg,
     },
     {
       icon: Lightbulb,
@@ -250,6 +263,7 @@ export function TeamsSlide() {
       obj: "Շիկացման, հալոգենային, լյումինեսցենտային և LED լամպեր",
       task: "LED-ի անցման մարման ժամկետը (Payback)",
       tone: "bg-save",
+      img: bulbsImg,
     },
   ];
   return (
@@ -264,16 +278,18 @@ export function TeamsSlide() {
       </div>
       <div className="absolute inset-x-[110px] top-[370px] grid grid-cols-3 gap-10 perspective">
         {teams.map(({ icon: Icon, ...t }, i) => (
-          <div key={t.n} className="a-flip glass-card flex min-h-[580px] flex-col rounded-[40px] p-10" style={delay(300 + i * 220)}>
-            <div className="flex items-center justify-between">
+          <div key={t.n} className="a-flip glass-card relative flex min-h-[600px] flex-col overflow-hidden rounded-[40px] p-10" style={delay(300 + i * 220)}>
+            <img src={t.img} alt={t.n} width={1280} height={1280} className="ken-burns absolute inset-x-0 top-0 h-[260px] w-full object-cover" />
+            <div className="absolute inset-x-0 top-0 h-[262px] bg-gradient-to-b from-transparent via-card/40 to-card" />
+            <div className="relative mt-[110px] flex items-center justify-between">
               <div className={`${t.tone} flex h-24 w-24 items-center justify-center rounded-3xl text-primary-foreground glow`}>
                 <Icon className="h-12 w-12" />
               </div>
               <span className="slide-badge slide-num rounded-full border border-border px-5 py-2 text-muted-foreground">{t.n}</span>
             </div>
-            <h3 className="slide-body mt-8 font-bold leading-tight">{t.name}</h3>
-            <p className="slide-caption mt-5 text-muted-foreground">{t.obj}</p>
-            <div className="mt-auto flex items-start gap-4 rounded-2xl bg-secondary/70 p-5">
+            <h3 className="slide-body relative mt-6 font-bold leading-tight">{t.name}</h3>
+            <p className="slide-caption relative mt-4 text-muted-foreground">{t.obj}</p>
+            <div className="relative mt-auto flex items-start gap-4 rounded-2xl bg-secondary/70 p-5">
               <BatteryCharging className="mt-1 h-8 w-8 shrink-0 text-primary" />
               <span className="slide-caption">{t.task}</span>
             </div>

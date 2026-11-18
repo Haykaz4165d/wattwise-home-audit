@@ -2,7 +2,10 @@ import { CalendarDays, Cpu, Flame, Ghost, Lightbulb, Plug, Sparkles, Thermometer
 import kitchen from "@/assets/kitchen-appliances.jpg";
 import standby from "@/assets/standby-devices.jpg";
 import bulbs from "@/assets/bulbs-compare.jpg";
-import { Kicker, SlideLayout, delay } from "./SlideLayout";
+import timelineImg from "@/assets/timeline-students.jpg";
+import paradoxImg from "@/assets/paradox-iron-fridge.jpg";
+import stripImg from "@/assets/team2-powerstrip.jpg";
+import { Backdrop, FloatingPhoto, Kicker, SlideLayout, delay } from "./SlideLayout";
 import { CountUp } from "./CountUp";
 import { energyKwh, fridge, iron, standbyDevices, standbyYear, STANDBY_HOURS_PER_DAY } from "@/lib/energy";
 import type { CSSProperties } from "react";
@@ -17,6 +20,7 @@ export function TimelineSlide() {
   ];
   return (
     <SlideLayout>
+      <Backdrop src={timelineImg} alt="Աշակերտները աշխատում են աղյուսակի վրա" overlay="bg-background/65" />
       <div className="absolute left-[110px] top-[100px]">
         <Kicker>
           <CalendarDays className="h-6 w-6" /> Աշխատանքային պլան
@@ -84,7 +88,8 @@ export function ParadoxSlide() {
   );
   return (
     <SlideLayout>
-      <div className="absolute left-[110px] top-[100px] w-[1700px]">
+      <FloatingPhoto src={paradoxImg} alt="Արդուկ և սառնարան" className="right-[110px] top-[70px] h-[260px] w-[540px]" />
+      <div className="absolute left-[110px] top-[100px] w-[1100px]">
         <Kicker>Ա. Հզորություն ≠ ծախս</Kicker>
         <h2 className="slide-title a-rise mt-8" style={delay(120)}>
           Հզոր չի նշանակում <span className="text-gradient-energy">թանկ</span>
@@ -195,6 +200,7 @@ export function Team2Slide() {
   const max = Math.max(...standbyDevices.map((d) => d.watts));
   return (
     <SlideLayout>
+      <Backdrop src={stripImg} alt="Երկարացման լար Standby լույսերով" overlay="bg-background/55" />
       <div className="absolute left-[110px] top-[100px] w-[1700px]">
         <Kicker tone="destructive">
           <Plug className="h-6 w-6" /> Թիմ 2 · Ժամանցային տեխնիկա և Standby
