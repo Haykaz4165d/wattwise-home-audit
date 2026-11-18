@@ -7,6 +7,7 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant short-land (@media (max-height: 560px) and (orientation: landscape));
 
 @theme inline {
   --font-sans: "Noto Sans Armenian", system-ui, sans-serif;

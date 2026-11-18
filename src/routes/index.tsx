@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, LayoutGrid, Maximize, Minimize, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, LayoutGrid, Maximize, Minimize, NotebookPen, X } from "lucide-react";
+import { NotesPanel } from "@/components/deck/NotesPanel";
 import { slides } from "@/components/deck/registry";
 import { ScaledSlide } from "@/components/deck/ScaledSlide";
 import { cn } from "@/lib/utils";
@@ -34,7 +35,18 @@ function Deck() {
   const [grid, setGrid] = useState(false);
   const [fs, setFs] = useState(false);
   const [idle, setIdle] = useState(false);
+  const [notes, setNotes] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (localStorage.getItem("deck:notes") === "off") setNotes(false);
+  }, []);
+  const toggleNotes = () =>
+    setNotes((n) => {
+      localStorage.setItem("deck:notes", n ? "off" : "on");
+      return !n;
+    });
 
   const go = useCallback(
     (i: number) => {
@@ -59,6 +71,7 @@ function Deck() {
       } else if (e.key === "Home") go(0);
       else if (e.key === "End") go(total - 1);
       else if (e.key.toLowerCase() === "g") setGrid((g) => !g);
+      else if (e.key.toLowerCase() === "n") toggleNotes();
       else if (e.key.toLowerCase() === "f" || e.key === "F5") {
         e.preventDefault();
         toggleFs();
@@ -120,8 +133,9 @@ function Deck() {
         <div className="bg-energy h-full transition-all duration-500" style={{ width: `${((index + 1) / total) * 100}%` }} />
       </div>
 
-      <main className={cn("relative flex-1", fs ? "p-0" : "p-2 sm:p-6")}>
-        <div className="relative h-full w-full">
+      <div className="flex min-h-0 flex-1 flex-col short-land:flex-row">
+      <main className={cn("relative min-h-0 min-w-0 flex-1", fs ? "p-0" : "p-2 sm:p-6")}>
+        <div ref={stageRef} className="relative h-full w-full">
           <ScaledSlide key={index} page={index + 1} total={total}>
             <Component />
           </ScaledSlide>
@@ -129,6 +143,15 @@ function Deck() {
           <button aria-label="Հաջորդ սլայդ" onClick={() => go(index + 1)} className="absolute inset-y-0 right-0 w-1/5 cursor-e-resize" />
         </div>
       </main>
+
+      {notes && !fs && (
+        <NotesPanel
+          slideId={current.id}
+          title={current.title}
+          getSlideText={() => (stageRef.current?.querySelector(".slide-content") as HTMLElement | null)?.innerText ?? current.title}
+        />
+      )}
+      </div>
 
       <nav
         className={cn(
@@ -150,6 +173,9 @@ function Deck() {
           </CtrlButton>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
+          <CtrlButton label="Խոսքի նշումներ (N)" onClick={toggleNotes} active={notes}>
+            <NotebookPen className="h-5 w-5" />
+          </CtrlButton>
           <CtrlButton label="Բոլոր սլայդները (G)" onClick={() => setGrid(true)}>
             <LayoutGrid className="h-5 w-5" />
           </CtrlButton>
@@ -201,14 +227,18 @@ function Deck() {
   );
 }
 
-function CtrlButton({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled?: boolean; children: React.ReactNode }) {
+function CtrlButton({ label, onClick, disabled, active, children }: { label: string; onClick: () => void; disabled?: boolean; active?: boolean; children: React.ReactNode }) {
   return (
     <button
       aria-label={label}
       title={label}
       onClick={onClick}
       disabled={disabled}
-      className="inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition hover:bg-secondary hover:text-primary disabled:opacity-30"
+      aria-pressed={active}
+      className={cn(
+        "inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition hover:bg-secondary hover:text-primary disabled:opacity-30",
+        active && "bg-secondary text-primary",
+      )}
     >
       {children}
     </button>

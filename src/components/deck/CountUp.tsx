@@ -16,7 +16,15 @@ export function CountUp({ to, digits = 0, duration = 1600, delay = 0 }: { to: nu
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    // Phones can pause animation frames (low-power mode, background iframes); always land on the final value.
+    const done = setTimeout(() => {
+      cancelAnimationFrame(raf);
+      setV(to);
+    }, delay + duration + 150);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(done);
+    };
   }, [to, duration, delay, isStatic]);
   return <>{fmt(v, digits)}</>;
 }
