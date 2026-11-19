@@ -153,9 +153,17 @@
 .slide-badge, .slide-page { white-space: nowrap; }
 .slide-num { font-family: var(--font-display); font-feature-settings: "tnum"; }
 
-.text-gradient-energy { background: var(--gradient-energy); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.text-gradient-save { background: var(--gradient-save); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.text-gradient-waste { background: var(--gradient-waste); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.text-gradient-energy, .text-gradient-save, .text-gradient-waste {
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% 100%;
+  animation: shimmer 6s linear infinite;
+}
+.text-gradient-energy { background-image: linear-gradient(110deg, var(--primary), var(--heat) 25%, var(--primary) 50%, var(--heat) 75%, var(--primary)); }
+.text-gradient-save { background-image: linear-gradient(110deg, var(--accent), var(--led) 25%, var(--accent) 50%, var(--led) 75%, var(--accent)); }
+.text-gradient-waste { background-image: linear-gradient(110deg, var(--heat), var(--destructive) 25%, var(--heat) 50%, var(--destructive) 75%, var(--heat)); }
+@keyframes shimmer { from { background-position: 0% 0; } to { background-position: -200% 0; } }
 .bg-energy { background: var(--gradient-energy); }
 .bg-save { background: var(--gradient-save); }
 .bg-waste { background: var(--gradient-waste); }
@@ -165,6 +173,28 @@
   border: 1px solid var(--border);
   box-shadow: var(--shadow-card);
 }
+/* Layered so Tailwind's `absolute` utility still wins; `relative` anchors the sheen. */
+@layer components {
+  .glass-card { position: relative; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .glass-card { transition: translate 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s; }
+  .glass-card:hover { translate: 0 -10px; box-shadow: var(--shadow-card), var(--shadow-glow); }
+  /* A soft light sweep crossing every card now and then. */
+  .glass-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent 38%, oklch(1 0 0 / 0.09) 50%, transparent 62%) no-repeat;
+    background-size: 300% 100%;
+    background-position: 0% 0;
+    animation: sheen 9s ease-in-out infinite;
+    animation-delay: calc(var(--d, 0) * 1ms + 1.6s);
+  }
+}
+@keyframes sheen { 0% { background-position: 0% 0; } 30%, 100% { background-position: 100% 0; } }
 .glow { box-shadow: var(--shadow-glow); }
 .glow-save { box-shadow: var(--shadow-glow-save); }
 
@@ -188,6 +218,9 @@
   animation-fill-mode: backwards;
   animation-delay: calc(var(--d, 0) * 1ms);
 }
+/* Headlines wipe up from a mask instead of a plain rise. */
+.slide-title.a-rise, .slide-title-lg.a-rise { animation-name: title-reveal; animation-duration: 1.2s; }
+@keyframes title-reveal { from { opacity: 0; transform: translateY(50px) skewY(2deg); clip-path: inset(0 0 100% 0); } }
 /* Safety net: once a slide has settled, drop entrance animations so content can never stay hidden
    (and the browser can release their layers). Keyframes only define `from`, so this is the final look. */
 .slide-settled :is(.a-rise, .a-zoom, .a-flip, .a-tilt, .a-left, .a-right, .a-grow-x, .a-grow-y, .a-pop, .a-blur, .a-draw, .a-fade) {
@@ -222,6 +255,47 @@
 @keyframes blur-in { from { opacity: 0; transform: scale(1.08); } }
 @keyframes fade { from { opacity: 0; } }
 @keyframes draw { from { stroke-dashoffset: var(--len, 2000); } }
+
+/* ---------- Slide change: 3D page turn (class removed after 1.2 s in the player) ---------- */
+.deck-in-next { animation: deck-in-next 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; transform-origin: left center; }
+.deck-in-prev { animation: deck-in-prev 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; transform-origin: right center; }
+@keyframes deck-in-next { from { opacity: 0; transform: perspective(2200px) translateX(6%) rotateY(-24deg) scale(0.9); } }
+@keyframes deck-in-prev { from { opacity: 0; transform: perspective(2200px) translateX(-6%) rotateY(24deg) scale(0.9); } }
+
+/* ---------- Ambient layers in every slide ---------- */
+.aurora {
+  position: absolute;
+  inset: -15%;
+  pointer-events: none;
+  background:
+    radial-gradient(700px 460px at 22% 28%, oklch(0.84 0.16 80 / 0.11), transparent 70%),
+    radial-gradient(800px 520px at 78% 72%, oklch(0.8 0.16 160 / 0.09), transparent 70%),
+    radial-gradient(560px 420px at 62% 12%, oklch(0.88 0.07 225 / 0.08), transparent 70%);
+  animation: aurora 20s ease-in-out infinite alternate;
+}
+@keyframes aurora {
+  from { transform: translate(0, 0) rotate(0deg) scale(1); }
+  to { transform: translate(-5%, 4%) rotate(7deg) scale(1.08); }
+}
+.cursor-light { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .cursor-light {
+    display: block;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(520px circle at calc(50% + var(--mx, 0) * 50%) calc(50% + var(--my, 0) * 50%), oklch(0.84 0.16 80 / 0.1), transparent 70%);
+  }
+  .parallax-back, .parallax-mid, .parallax-front { transition: translate 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .parallax-back { translate: calc(var(--mx, 0) * -22px) calc(var(--my, 0) * -14px); }
+  .parallax-mid { translate: calc(var(--mx, 0) * 14px) calc(var(--my, 0) * 10px); }
+  .parallax-front { translate: calc(var(--mx, 0) * 30px) calc(var(--my, 0) * 20px); }
+}
+.slide-static .cursor-light { display: none; }
+.slide-kicker svg { animation: icon-wiggle 3.2s ease-in-out infinite; transform-origin: center; }
+@keyframes icon-wiggle { 0%, 70%, 100% { transform: rotate(0) scale(1); } 80% { transform: rotate(-14deg) scale(1.15); } 90% { transform: rotate(10deg) scale(1.1); } }
+.zap-flicker { animation: zap-flicker 4s linear infinite; }
+@keyframes zap-flicker { 0%, 88%, 92%, 96%, 100% { opacity: 1; filter: drop-shadow(0 0 6px var(--primary)); } 90%, 94% { opacity: 0.3; filter: none; } }
 
 /* ---------- Continuous 3D / ambient motion ---------- */
 .float-3d { animation: float-3d 7s ease-in-out infinite; transform: perspective(1400px) rotateY(-8deg) rotateX(4deg); }

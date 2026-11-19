@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { SlideContext } from "./context";
 
 /** Renders a 1920×1080 slide scaled to fit its container. */
@@ -15,6 +15,7 @@ export function ScaledSlide({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0);
+  const ctx = useMemo(() => ({ page, total, static: isStatic }), [page, total, isStatic]);
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -38,7 +39,7 @@ export function ScaledSlide({
           visibility: scale ? "visible" : "hidden",
         }}
       >
-        <SlideContext.Provider value={{ page, total, static: isStatic }}>{children}</SlideContext.Provider>
+        <SlideContext.Provider value={ctx}>{children}</SlideContext.Provider>
       </div>
     </div>
   );

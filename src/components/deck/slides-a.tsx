@@ -26,7 +26,7 @@ import { TARIFF_AMD } from "@/lib/energy";
 export function TitleSlide() {
   return (
     <SlideLayout sparks={18}>
-      <div className="absolute right-[40px] top-[80px] h-[880px] w-[1080px] perspective">
+      <div className="parallax-front absolute right-[40px] top-[80px] h-[880px] w-[1080px] perspective">
         <div className="float-3d h-full w-full">
           <div className="a-blur relative h-full w-full overflow-hidden rounded-[48px] glow" style={delay(200)}>
             <img src={house} alt="Տան էլեկտրացանցի եռաչափ պատկեր" width={1536} height={1024} className="ken-burns h-full w-full object-cover" />

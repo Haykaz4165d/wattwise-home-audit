@@ -122,6 +122,13 @@ function Deck() {
     touch.current = null;
   };
 
+  // Direction of the last move, for the 3D slide-change transition.
+  const prevIndex = useRef(index);
+  const dir = index >= prevIndex.current ? 1 : -1;
+  useEffect(() => {
+    prevIndex.current = index;
+  }, [index]);
+
   const current = slides[index]!;
   const { Component } = current;
   const hideUi = fs && idle;
@@ -136,9 +143,11 @@ function Deck() {
       <div className="flex min-h-0 flex-1 flex-col short-land:flex-row">
       <main className={cn("relative min-h-0 min-w-0 flex-1", fs ? "p-0" : "p-2 sm:p-6")}>
         <div ref={stageRef} className="relative h-full w-full">
-          <ScaledSlide key={index} page={index + 1} total={total}>
-            <Component />
-          </ScaledSlide>
+          <DeckStage key={index} dir={dir}>
+            <ScaledSlide page={index + 1} total={total}>
+              <Component />
+            </ScaledSlide>
+          </DeckStage>
           <button aria-label="Նախորդ սլայդ" onClick={() => go(index - 1)} className="absolute inset-y-0 left-0 w-1/5 cursor-w-resize" />
           <button aria-label="Հաջորդ սլայդ" onClick={() => go(index + 1)} className="absolute inset-y-0 right-0 w-1/5 cursor-e-resize" />
         </div>
@@ -225,6 +234,17 @@ function Deck() {
       )}
     </div>
   );
+}
+
+/** 3D page-turn on slide change. The class is dropped after 1.2 s so a stalled animation can never leave the slide hidden. */
+function DeckStage({ dir, children }: { dir: number; children: React.ReactNode }) {
+  const [entering, setEntering] = useState(true);
+  const [from] = useState(dir); // fixed at mount so later re-renders don't flip the direction
+  useEffect(() => {
+    const t = setTimeout(() => setEntering(false), 1200);
+    return () => clearTimeout(t);
+  }, []);
+  return <div className={cn("deck-stage absolute inset-0", entering && (from > 0 ? "deck-in-next" : "deck-in-prev"))}>{children}</div>;
 }
 
 function CtrlButton({ label, onClick, disabled, active, children }: { label: string; onClick: () => void; disabled?: boolean; active?: boolean; children: React.ReactNode }) {

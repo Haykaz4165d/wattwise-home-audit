@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSlide } from "./context";
@@ -17,13 +17,38 @@ export function SlideLayout({
 }) {
   const { page, total, static: isStatic } = useSlide();
   const [settled, setSettled] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const t = setTimeout(() => setSettled(true), 4000);
     return () => clearTimeout(t);
   }, []);
+  // Mouse parallax (desktop only): writes --mx/--my in [-1, 1]; CSS layers move by different depths.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || isStatic || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    let raf = 0;
+    const onMove = (e: PointerEvent) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const r = el.getBoundingClientRect();
+        if (!r.width) return;
+        const mx = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1));
+        const my = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height) * 2 - 1));
+        el.style.setProperty("--mx", mx.toFixed(3));
+        el.style.setProperty("--my", my.toFixed(3));
+      });
+    };
+    window.addEventListener("pointermove", onMove);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("pointermove", onMove);
+    };
+  }, [isStatic]);
   return (
-    <div className={cn("slide-content", isStatic && "slide-static", settled && "slide-settled")}>
-      <div className="pointer-events-none absolute inset-0">
+    <div ref={ref} className={cn("slide-content", isStatic && "slide-static", settled && "slide-settled")}>
+      <div className="aurora" aria-hidden />
+      <div className="cursor-light" aria-hidden />
+      <div className="parallax-mid pointer-events-none absolute inset-0">
         {Array.from({ length: sparks }).map((_, i) => (
           <span
             key={i}
@@ -44,7 +69,7 @@ export function SlideLayout({
       {chrome && (
         <div className="slide-footer absolute inset-x-[96px] bottom-[40px] flex items-center justify-between text-muted-foreground">
           <div className="flex items-center gap-3">
-            <Zap className="h-6 w-6 text-primary" />
+            <Zap className="zap-flicker h-6 w-6 text-primary" />
             <span>11-4 դասարան · Նախագծային աշխատանք</span>
           </div>
           <span className="slide-page slide-num">
@@ -104,7 +129,7 @@ export function Backdrop({ src, alt, area = "full", overlay }: { src: string; al
       className={cn("pointer-events-none absolute overflow-hidden", backdropBox[area])}
       style={{ maskImage: backdropMask[area], WebkitMaskImage: backdropMask[area] }}
     >
-      <img src={src} alt={alt} width={1600} height={912} className="ken-burns h-full w-full object-cover" />
+      <img src={src} alt={alt} width={1600} height={912} className="ken-burns parallax-back h-full w-full object-cover" />
       <div className={cn("absolute inset-0", overlay ?? backdropOverlay[area])} />
       {area === "full" && <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />}
     </div>
@@ -114,7 +139,7 @@ export function Backdrop({ src, alt, area = "full", overlay }: { src: string; al
 /** Tilted, floating framed photo for free areas of a slide. */
 export function FloatingPhoto({ src, alt, className, d = 150 }: { src: string; alt: string; className: string; d?: number }) {
   return (
-    <div className={cn("absolute perspective", className)}>
+    <div className={cn("parallax-front absolute perspective", className)}>
       <div className="float-3d h-full w-full">
         <div className="a-blur h-full w-full overflow-hidden rounded-[40px] border border-border glow" style={delay(d)}>
           <img src={src} alt={alt} width={1600} height={912} className="ken-burns h-full w-full object-cover" />
