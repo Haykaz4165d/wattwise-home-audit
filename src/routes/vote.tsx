@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { CheckCircle2, Loader2, Send, Users, Zap } from "lucide-react";
-import { POLL_QUESTIONS, emptyTally, percentages, voterCount, type Tally } from "@/lib/poll";
-import { fetchTally, hasVoted, submitVote } from "@/lib/poll-api";
+import { CheckCircle2, Loader2, Send, Zap } from "lucide-react";
+import { POLL_QUESTIONS } from "@/lib/poll";
+import { hasVoted, submitVote } from "@/lib/poll-api";
 import { cn } from "@/lib/utils";
 
 const TITLE = "Քվեարկություն · Էներգաարդյունավետություն — 11-4 դասարան";
@@ -28,24 +28,10 @@ function VotePage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
-  const [tally, setTally] = useState<Tally>(emptyTally);
 
   useEffect(() => {
     if (hasVoted()) setDone(true);
   }, []);
-
-  // Live results once this device has voted.
-  useEffect(() => {
-    if (!done) return;
-    let alive = true;
-    const load = () => fetchTally().then((t) => alive && setTally(t)).catch(() => {});
-    load();
-    const id = setInterval(load, 5000);
-    return () => {
-      alive = false;
-      clearInterval(id);
-    };
-  }, [done]);
 
   const answered = answers.filter((a) => a !== undefined).length;
   const complete = answered === POLL_QUESTIONS.length;
@@ -56,7 +42,7 @@ function VotePage() {
     setError(null);
     try {
       const res = await submitVote(answers as number[]);
-      if (res === "already") setNote("Այս սարքից արդեն քվեարկել եք։ Ահա արդյունքները։");
+      if (res === "already") setNote("Այս սարքից արդեն քվեարկել եք։");
       setDone(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
@@ -74,27 +60,19 @@ function VotePage() {
             <Zap className="h-4 w-4" /> 11-4 դասարան · Քվեարկություն
           </div>
           <h1 className="font-display text-2xl font-extrabold leading-tight sm:text-3xl">
-            {done ? "Արդյունքներ" : "Ինչպե՞ս եք դուք օգտագործում էլեկտրաէներգիան"}
+            {done ? "Շնորհակալություն" : "Ինչպե՞ս եք դուք օգտագործում էլեկտրաէներգիան"}
           </h1>
-          {done ? (
-            <p className="flex items-start gap-2 text-sm text-muted-foreground">
-              <Users className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>
-                Քվեարկել է՝ <b className="text-foreground">{voterCount(tally)}</b> մարդ · թարմանում է ինքնաբերաբար
-              </span>
-            </p>
-          ) : (
+          {!done && (
             <p className="text-sm text-muted-foreground">Ընտրեք մեկ պատասխան յուրաքանչյուր հարցի համար, ապա սեղմեք «Ուղարկել»։</p>
           )}
           {done && (
             <p className="flex items-center gap-2 rounded-xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm text-accent">
-              <CheckCircle2 className="h-5 w-5 shrink-0" /> {note ?? "Շնորհակալություն, ձեր քվեն պահպանված է։"}
+              <CheckCircle2 className="h-5 w-5 shrink-0" /> {note ?? "Ձեր քվեն պահպանված է։ Արդյունքները կտեսնեք ներկայացման էկրանին։"}
             </p>
           )}
         </header>
 
-        {POLL_QUESTIONS.map((q, qi) => {
-          const pct = percentages(tally[qi] ?? [0, 0, 0, 0]);
+        {!done && POLL_QUESTIONS.map((q, qi) => {
           return (
             <section key={qi} className="rounded-2xl border border-border bg-card/80 p-4 shadow-lg sm:p-5">
               <h2 className="mb-3 text-base font-bold leading-snug">
@@ -103,15 +81,7 @@ function VotePage() {
               </h2>
               <div className="flex flex-col gap-2">
                 {q.options.map((opt, oi) =>
-                  done ? (
-                    <div key={oi} className="relative overflow-hidden rounded-xl border border-border bg-secondary/40 px-4 py-2.5">
-                      <div className="bg-energy absolute inset-y-0 left-0 opacity-30 transition-[width] duration-700" style={{ width: `${pct[oi]}%` }} />
-                      <div className="relative flex items-center justify-between gap-3 text-sm">
-                        <span>{opt}</span>
-                        <span className="font-display font-bold text-primary">{pct[oi]}%</span>
-                      </div>
-                    </div>
-                  ) : (
+                  (
                     <button
                       key={oi}
                       type="button"
