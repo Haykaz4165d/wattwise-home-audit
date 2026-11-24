@@ -397,3 +397,8 @@
   .print-page { break-after: page; page-break-after: always; }
   .no-print { display: none !important; }
 }
+
+/* Poll slide: a laser line sweeps over the QR code (moves only, never hides it). */
+.qr-scan { animation: qr-scan 2.8s ease-in-out infinite alternate; background: linear-gradient(to bottom, transparent, var(--primary), transparent); box-shadow: 0 0 24px var(--primary); }
+@keyframes qr-scan { from { transform: translateY(0); } to { transform: translateY(var(--qr-h, 400px)); } }
+.slide-static .qr-scan { display: none; }
